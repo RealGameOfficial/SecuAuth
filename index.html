@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>SecuAuth | Uygulama Oluştur</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; }
+    input, textarea, select { width: 100%; padding: 8px; margin: 5px 0; }
+    button { padding: 10px 20px; }
+    #outputBox { background: #f0f0f0; padding: 10px; margin-top: 20px; font-family: monospace; }
+    .alert { color: red; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>SecuAuth Uygulama Oluştur</h1>
+
+  <!-- Kullanıcı Kontrolü -->
+  <div id="loginCheck"></div>
+
+  <form id="appForm" style="display:none;">
+    <label>Uygulama İsmi</label>
+    <input type="text" id="appName" required>
+
+    <label>Açıklama</label>
+    <textarea id="appDesc" required></textarea>
+
+    <label>Lisans</label>
+    <select id="appLicense">
+      <option>MIT</option>
+      <option>Apache</option>
+      <option>GPL</option>
+      <option>Creative Commons</option>
+    </select>
+
+    <button type="submit">HTML Kodu Oluştur</button>
+  </form>
+
+  <div id="outputBox" style="display:none;">
+    <h3>Bu kodu sitene ekle:</h3>
+    <textarea id="embedCode" rows="6" readonly></textarea>
+    <button onclick="copyCode()">Kopyala</button>
+  </div>
+
+  <div id="errorMessage" class="alert" style="display:none;"></div>
+
+  <script>
+    // Kullanıcı verilerini al
+    const user = JSON.parse(localStorage.getItem("secuauth_user"));
+    const loginCheck = document.getElementById("loginCheck");
+    const appForm = document.getElementById("appForm");
+    const errorMessage = document.getElementById("errorMessage");
+
+    // Eğer kullanıcı yoksa hata mesajı göster
+    if (!user) {
+      errorMessage.style.display = "block";
+      errorMessage.textContent = "Lütfen uygulamanızı oluşturmak için kullanıcı bilgilerinizi sağlayın!";
+    } else {
+      // Kullanıcı bilgisi varsa formu göster
+      loginCheck.innerHTML = `<p>Hoş geldiniz, <strong>${user.username}</strong> (${user.email})</p>`;
+      appForm.style.display = "block";
+    }
+
+    // Form gönderilince
+    document.getElementById("appForm").onsubmit = function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById("appName").value;
+      const desc = document.getElementById("appDesc").value;
+      const license = document.getElementById("appLicense").value;
+
+      if (!name || !desc || !license) {
+        errorMessage.style.display = "block";
+        errorMessage.textContent = "Tüm alanları doldurduğunuzdan emin olun!";
+        return;
+      }
+
+      // HTML kodu oluştur
+      const html = `<div id="secuauth-app" style="font-family:sans-serif;font-size:14px;border:1px solid #ccc;padding:10px;border-radius:6px;background:#f9f9f9;">
+                      <strong>Uygulama:</strong> ${name}<br>
+                      <strong>Açıklama:</strong> ${desc}<br>
+                      <strong>Geliştirici:</strong> ${user.username}<br>
+                      <strong>Lisans:</strong> ${license}<br>
+                      <em style="font-size:12px;color:#555;">Verified by <a href='https://yourgithub.github.io/secuauth' target='_blank' style='color:#007bff;text-decoration:none;'>SecuAuth</a></em>
+                    </div>`;
+
+      // HTML kodunu textarea'ya koy
+      document.getElementById("embedCode").value = html;
+      document.getElementById("outputBox").style.display = "block";
+      errorMessage.style.display = "none";
+    };
+
+    // Kopyalama fonksiyonu
+    function copyCode() {
+      const code = document.getElementById("embedCode");
+      code.select();
+      document.execCommand("copy");
+      alert("Kod kopyalandı!");
+    }
+  </script>
+</body>
+</html>
